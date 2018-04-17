@@ -1,0 +1,162 @@
+﻿<!DOCTYPE html>
+<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+<!-- three.js library -->
+<script src='https://cdnjs.cloudflare.com/ajax/libs/three.js/91/three.min.js'></script>
+<!-- ar.js -->
+<script src="https://jeromeetienne.github.io/AR.js/three.js/build/ar.js"></script>
+<script src="https://stemkoski.github.io/Three.js/js/Detector.js"></script>
+<script>THREEx.ArToolkitContext.baseURL = 'https://jeromeetienne.github.io/AR.js/'</script>
+
+<body style='margin : 0px; overflow: hidden; font-family: Monospace;'>
+
+    <script>
+
+			var container, stats;
+			var camera, scene, renderer;
+			var particleMaterial;
+
+			var raycaster;
+			var mouse;
+
+			var objects = [];
+
+			init();
+			animate();
+
+			function init() {
+
+				container = document.createElement( 'div' );
+				document.body.appendChild( container );
+
+
+				camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 10000 );
+				camera.position.set( 0, 300, 500 );
+
+				scene = new THREE.Scene();
+				scene.background = new THREE.Color( 0xf0f0f0 );
+
+
+
+				addBlock(100, 200, -300, 100, 100, 100, 'Images/VR-Balloon.png', 'InteractableItem|ClickData');
+
+
+				raycaster = new THREE.Raycaster();
+				mouse = new THREE.Vector2();
+
+				renderer = new THREE.WebGLRenderer({
+				    antialias: true,
+				    alpha: true
+				});
+				renderer.setClearColor(new THREE.Color('lightgrey'), 0)
+				renderer.setSize(1020, 960);
+				renderer.domElement.style.position = 'absolute'
+				renderer.domElement.style.top = '0px'
+				renderer.domElement.style.left = '0px'
+				container.appendChild( renderer.domElement );
+
+
+				document.addEventListener( 'mousedown', onDocumentMouseDown, false );
+				document.addEventListener( 'touchstart', onDocumentTouchStart, false );
+
+				window.addEventListener( 'resize', onWindowResize, false );
+
+			}
+
+			function addBlock(x, y, z, width, height, depth, textureLocation, clickInformation) {
+			    var geometry = new THREE.BoxGeometry(width, height, depth);
+			    var object;
+
+                if (textureLocation != '')
+                {
+                    var texture = new THREE.TextureLoader().load( textureLocation );
+                    var material = new THREE.MeshBasicMaterial( { map: texture } );
+                    object = new THREE.Mesh(geometry, material);
+                } else {
+                    object = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ color: Math.random() * 0xffffff, opacity: 0.5 }));
+                }
+
+                if (clickInformation != '')
+                {
+                object.name = clickInformation;
+                }
+
+			    object.position.x = x;
+			    object.position.y = y;
+			    object.position.z = z;
+
+			    object.scale.x = 1;
+			    object.scale.y = 1;
+			    object.scale.z = 1;
+
+			    scene.add(object);
+
+			    objects.push(object);
+			}
+
+			function onWindowResize() {
+
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+			}
+
+			function onDocumentTouchStart( event ) {
+
+				event.preventDefault();
+
+				event.clientX = event.touches[0].clientX;
+				event.clientY = event.touches[0].clientY;
+				onDocumentMouseDown( event );
+
+			}
+
+			function onDocumentMouseDown( event ) {
+
+				event.preventDefault();
+
+				mouse.x = ( event.clientX / renderer.domElement.clientWidth ) * 2 - 1;
+				mouse.y = - ( event.clientY / renderer.domElement.clientHeight ) * 2 + 1;
+
+				raycaster.setFromCamera( mouse, camera );
+
+				var intersects = raycaster.intersectObjects( objects );
+
+				if ( intersects.length > 0 ) {
+          var itemName = "." + intersects[0].object.name;
+          if (itemName.substring(1, 17) == "InteractableItem") {
+              intersects[ 0 ].object.material.color.setHex( Math.random() * 0xffffff );
+          }
+
+					/*var particle = new THREE.Sprite( particleMaterial );
+					particle.position.copy( intersects[ 0 ].point );
+					particle.scale.x = particle.scale.y = 16;
+					scene.add( particle );*/
+
+				}
+
+			}
+
+			function animate() {
+
+				requestAnimationFrame( animate );
+
+				render();
+
+			}
+
+			var radius = 600;
+			var theta = 0;
+
+			function render() {
+
+				renderer.render( scene, camera );
+
+			}
+
+			onWindowResize()
+
+    </script>
+
+</body>

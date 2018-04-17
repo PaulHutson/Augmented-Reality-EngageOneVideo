@@ -66,8 +66,10 @@
     <Reference Include="System.EnterpriseServices" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="BaseInteractiveObject.html" />
     <Content Include="BaseVideo.html" />
     <Content Include="BaseAR.html" />
+    <Content Include="Images\VR-Balloon.png" />
     <Content Include="packages.config" />
     <Content Include="Video\sintel.ogv" />
     <None Include="Web.Debug.config">
